@@ -1,0 +1,26 @@
+#!/bin/bash
+case "$1" in
+#tootする
+  "toot" )
+    TEXT="$2"
+    num=`echo "$TEXT" | sed -e 's/"//g' | wc -m`
+    num=`expr $num - 1`
+    echo $num
+    if [ $num -gt 0 -a $num -le 500 ]
+    then
+      curl -X POST -d "status=$TEXT" --header "Authorization: Bearer $DON_ACCESS_TOKEN" -sS $DON_SERVER_HOST"/api/v1/statuses";
+
+    fi
+  ;;
+  "--help" )
+    echo '----------------'
+    echo '・mytodon toot ["文字列"]'
+    echo -e '\tトゥートする（最大500文字まで）'
+    echo '・mytodon --help'
+    echo -e '\thelpの確認'
+    echo '----------------'
+  ;;
+  *  )
+   echo "mytodon --helpを参照してください。"
+  ;;
+esac

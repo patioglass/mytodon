@@ -1,0 +1,74 @@
+#!/bin/bash
+
+DON_PATH="/usr/local/bin/mytodon"
+if [ ! -e $DON_PATH ]
+then
+  chmod a+x mytodon
+  cp mytodon /usr/local/bin/mytodon
+fi
+while read LINE <&3
+do
+  if [[ "$LINE" =~ ^.*DON_ACCESS_TOKEN.*$ ]]
+
+  then
+    echo "既に設定済みです。"
+    echo -n "設定し直しますか？[yes/no]:"
+    read ANS
+    if [ "$ANS" = "yes" ]
+    then
+      cat ~/.bashrc | sed -i -e "/^export.*DON_ACCESS_TOKEN.*$/d" -e "/^export.*DON_CLIENT_ID.*$/d" -e "/^export.DON_CLIENT_SECRET.*$/d" ~/.bashrc
+      break;
+    else
+      exit 0;
+    fi
+  fi
+done 3< ~/.bashrc
+
+
+echo -n "サーバのホスト名を登録(例：https://www.hogehoge.com):"
+read DON_SERVER_HOST
+echo -n "ユーザ名を登録(任意の文字列):"
+read CLIENT_NAME 
+echo -n $DON_SERVER_HOST"に登録しているメールアドレス:"
+read YOUR_EMAIL
+echo -n $DON_SERVER_HOST"に登録してるアカウントのパスワード:"
+read -s YOUR_PASSWORD
+echo ""
+
+echo 'export DON_SERVER_HOST="'$DON_SERVER_HOST'"' >> ~/.bashrc
+
+#client_idとclient_secretを取得
+tmp=`curl -f -X POST -d "client_name=$CLIENT_NAME&redirect_uris=urn:ietf:wg:oauth:2.0:oob&scopes=read write follow&website=" $DON_SERVER_HOST"/api/v1/apps"`
+
+if [ "$?" = 0 ]
+then
+  count=0
+  tmp=`echo $tmp |  awk 'match($0, /{.*}/)' | sed -e "s/{//" -e "s/}//" -e "s/,/\n/g" |  awk -F'\"' 'NR >= 3{print $4}'`
+  
+  while read LINE
+  do
+    if [ $count -eq 0 ]
+    then
+      export DON_CLIENT_ID=$LINE
+      echo 'export DON_CLIENT_ID="'$DON_CLIENT_ID'"' >> ~/.bashrc
+    else
+      export DON_CLIENT_SECRET=$LINE
+      echo 'export DON_CLIENT_SECRET="'$DON_CLIENT_SECRET'"' >> ~/.bashrc
+    fi
+    count=`expr $count + 1`
+  done < <(echo "$tmp")
+ 
+#アクセストークン取得
+  tmp=`curl -f -X POST -d "client_id=$DON_CLIENT_ID&client_secret=$DON_CLIENT_SECRET&grant_type=password&username=$YOUR_EMAIL&password=$YOUR_PASSWORD&scope=read write follow" -sS $DON_SERVER_HOST"/oauth/token";`
+  if [ "$?" -eq 0 ]
+  then
+    tmp=`echo $tmp |  awk 'match($0, /{.*}/)' | sed -e "s/{//" -e "s/}//" -e "s/,/\n/g" |  awk -F'\"' 'NR == 1{print $4}'`
+    echo 'export DON_ACCESS_TOKEN="'$tmp'"' >> ~/.bashrc
+    echo "設定が完了しました。mytodon --helpを参照してください。"
+  else
+    echo "error:トークン取得に失敗しました。"
+  fi
+else
+  echo "入力ミスがあります。もう一度やり直してください。"
+fi
+
