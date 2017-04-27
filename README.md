@@ -16,10 +16,10 @@ bash
     https://www.xxx.comに登録してるアカウントのパスワード:
     % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                     Dload  Upload   Total   Spent    Left  Speed
-   152   214    0   214    0    91    574    244 --:--:-- --:--:-- --:--:--  6833
-   設定が完了しました。mytodon --helpを参照してください。
-   #反映させる
-   source ~/.bashrc
+    152   214    0   214    0    91    574    244 --:--:-- --:--:-- --:--:--  6833
+    設定が完了しました。mytodon --helpを参照してください。
+    #反映させる
+    source ~/.bashrc
 
-##Usage
+## Usage
    mytodon toot "トゥート！"
