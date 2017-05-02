@@ -13,7 +13,8 @@
 を実行してください。（mytodonコマンドの更新）
 ## Requirement
 bash
-yum install jq
+
+    yum install jq
 ## Install
 
     git clone https://github.com/patioglass/mytodon.git 
