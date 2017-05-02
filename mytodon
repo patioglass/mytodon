@@ -12,10 +12,24 @@ case "$1" in
 
     fi
   ;;
+  "-t" )
+    if [ "$2" = "home"  ]
+    then
+      curl -X GET -d "status=$TEXT" --header "Authorization: Bearer $DON_ACCESS_TOKEN" -sS $DON_SERVER_HOST"/api/v1/timelines/home"  | jq -r '.[] | .content,.account.username,.created_at' | sed -e 's/<[^>]*>//g' | awk 'NR % 3 != 0{print $0;}NR % 3 == 0{print $0;print "\n-------------------"}' | tac
+    elif [ "$2" = "public" ]
+    then
+      curl -X GET -d "status=$TEXT" --header "Authorization: Bearer $DON_ACCESS_TOKEN" -sS $DON_SERVER_HOST"/api/v1/timelines/public"  | jq -r '.[] | .content,.account.username,.created_at' | sed -e 's/<[^>]*>//g' | awk 'NR % 3 != 0{print $0;}NR % 3 == 0{print $0;print "\n-------------------"}' | tac
+    fi
+  ;;
   "--help" )
     echo '----------------'
     echo '・mytodon toot ["文字列"]'
-    echo -e '\tトゥートする（最大500文字まで）'
+    echo -e '\tトゥートする（最大500文字まで）\n'
+    echo '・mytodon -t [arg]'
+    echo -e '\tホームタイムライン取得'
+    echo -e '\tmytodon -t home'
+    echo -e '\tローカルタイムライン取得'
+    echo -e '\tmytodon -t public\n'
     echo '・mytodon --help'
     echo -e '\thelpの確認'
     echo '----------------'

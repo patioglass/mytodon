@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DON_PATH="/usr/local/bin/mytodon"
+
+sudo rm $DON_PATH
+sudo cp mytodon $DON_PATH
+chmod u+x $DON_PATH
